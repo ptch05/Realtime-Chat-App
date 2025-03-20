@@ -25,18 +25,43 @@ public class Client {
     public void sendMessage(){
         try {
             bufferedWriter.write(username);
-            bufferedReader.newLine();
+            bufferedWriter.newLine();
             bufferedWriter.flush();
 
             Scanner scanner = new Scanner(System.in);
             while (socket.isConnected()){
-                String messageToSend = scanner.nextLine();
+                String messageToSend = scanner.nextLine(); // When user presses enter after typing something into the terminal, it's captured here
                 bufferedWriter.write(username + ": " + messageToSend);
                 bufferedWriter.newLine();
                 bufferedWriter.flush();
             }
-        } catch (){
-
+        } catch (IOException e){
+            closeEverything(socket, bufferedReader, bufferedWriter);
         }
+    }
+
+    //New thread for each client for listening. Waiting for messages that are broadcasting from broadcastMessage
+    public void listenForMessage(){
+        new Thread(new Runnable() {
+            @Override
+            //Any code placed in here will be executed on a separate thread
+            public void run() {
+                String msgFromGroupChat;
+
+                //only want to get messages from gc when connected to the server
+                while(socket.isConnected()){
+                    try {
+                        msgFromGroupChat = bufferedReader.readLine();
+                        System.out.println(msgFromGroupChat);
+                    } catch (IOException e){
+                        closeEverything(socket, bufferedReader, bufferedWriter);
+                    }
+                }
+            }
+        }).start(); //Creating the object then just starting it
+    }
+
+    public void closeEverything(Socket socket, BufferedReader bufferedReader, BufferedWriter bufferedWriter){
+
     }
 }
