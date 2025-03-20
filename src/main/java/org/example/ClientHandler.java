@@ -32,8 +32,34 @@ public class ClientHandler implements Runnable {
 
         while(socket.isConnected()){
             try {
+                //Need to run this on a separate thread as here program's being halted until a message is read
                 messageFromClient = bufferedReader.readLine();
+                broadcastMessage(messageFromClient);
+            } catch (IOException e){
+                closeEverything(socket, bufferedReader, bufferedWriter);
+                break;
             }
         }
+    }
+
+    public void broadcastMessage(String messageToSend){
+        for(ClientHandler clientHandler : clientHandlers){
+            try{
+                //Send message to all but yourself
+                if(!clientHandler.clientUsername.equals(clientUsername)){
+                    clientHandler.bufferedWriter.write(messageToSend);
+                    clientHandler.bufferedWriter.newLine();
+                    //Before buffer is full, have to manually flush it
+                    clientHandler.bufferedWriter.flush();
+                }
+            } catch (IOException e){
+                closeEverything(socket, bufferedReader, bufferedWriter);
+            }
+        }
+    }
+
+    public void removeClientHandler(){
+        clientHandlers.remove(this);
+        broadcastMessage("SERVER: " + clientUsername + " has left the chat!");
     }
 }
