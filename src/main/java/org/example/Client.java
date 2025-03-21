@@ -77,9 +77,13 @@ public class Client {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter you username for the group chat: ");
         String username = scanner.nextLine();
+        Socket socket = new Socket("localhost", 1234); //Technically it's meant to be an IP address but because it's on our local computer, it'll just be localhost
+        Client client = new Client(socket, username);
+        client.listenForMessage();
+        client.sendMessage();
     }
 }
